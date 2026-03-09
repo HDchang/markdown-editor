@@ -1,0 +1,370 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Light Theme */
+.app.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --bg-tertiary: #e8e8ed;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-muted: #a1a1a6;
+  --border-color: #d2d2d7;
+  --accent-color: #007aff;
+  --accent-hover: #0056cc;
+}
+
+/* Dark Theme */
+.app.dark {
+  --bg-primary: #000000;
+  --bg-secondary: #1c1c1e;
+  --bg-tertiary: #2c2c2e;
+  --text-primary: #f5f5f7;
+  --text-secondary: #98989d;
+  --text-muted: #636366;
+  --border-color: #38383a;
+  --accent-color: #0a84ff;
+  --accent-hover: #409cff;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-toggle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.sidebar-toggle-btn.light {
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.sidebar-toggle-btn.dark {
+  background: #2c2c2e;
+  color: #f5f5f7;
+}
+
+.sidebar-toggle-btn:hover {
+  background: #e8e8ed;
+}
+
+.sidebar-toggle-btn.dark:hover {
+  background: #3a3a3c;
+}
+
+.app-header h1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+/* File Info Section */
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.file-name:hover {
+  background: var(--border-color);
+}
+
+.file-name .unsaved {
+  color: #ff9500;
+  margin-left: 4px;
+}
+
+.file-name .auto-saving {
+  color: #34c759;
+  margin-left: 4px;
+  font-weight: 600;
+}
+
+.filename-input {
+  font-size: 13px;
+  color: var(--text-primary);
+  padding: 4px 10px;
+  background: var(--bg-primary);
+  border: 1px solid var(--accent-color);
+  border-radius: 6px;
+  outline: none;
+  width: 150px;
+}
+
+/* Auto-save Toggle */
+.auto-save-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.auto-save-toggle:hover {
+  background: var(--bg-tertiary);
+}
+
+.auto-save-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.toggle-switch {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.toggle-switch.off {
+  background: #86868b;
+}
+
+.toggle-switch.on {
+  background: #34c759;
+}
+
+.toggle-knob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch.on .toggle-knob {
+  transform: translateX(20px);
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* iOS Style Buttons */
+.ios-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ios-btn:hover {
+  background: var(--border-color);
+}
+
+.ios-btn:active {
+  transform: scale(0.97);
+}
+
+.ios-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ios-btn.primary {
+  background: var(--accent-color);
+  color: white;
+}
+
+.ios-btn.primary:hover {
+  background: var(--accent-hover);
+}
+
+.ios-btn.accent {
+  background: linear-gradient(135deg, #bf5af2, #5e5ce6);
+  color: white;
+}
+
+.ios-btn.accent:hover {
+  background: linear-gradient(135deg, #da8aff, #6e6cf6);
+}
+
+/* Theme Dropdown */
+.theme-dropdown {
+  position: relative;
+}
+
+.theme-btn {
+  min-width: 100px;
+  justify-content: flex-start;
+}
+
+.theme-label {
+  flex: 1;
+}
+
+.dropdown-arrow {
+  opacity: 0.6;
+}
+
+.theme-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 6px;
+  min-width: 140px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.theme-option {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.15s ease;
+}
+
+.theme-option:hover {
+  background: var(--border-color);
+}
+
+.theme-option.active {
+  background: var(--accent-color);
+  color: white;
+}
+
+.theme-option span {
+  font-size: 14px;
+}
+
+/* Main Content */
+.app-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.editor-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+/* Welcome Screen */
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-primary);
+}
+
+.welcome h2 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.welcome p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.shortcuts-hint {
+  margin-top: 20px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.shortcuts-hint span {
+  background: var(--bg-tertiary);
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin: 0 4px;
+  font-family: 'SF Mono', Monaco, monospace;
+}
