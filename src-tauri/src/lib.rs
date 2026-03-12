@@ -1,4 +1,5 @@
 use std::fs;
+use tauri::{Manager, Emitter};
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
@@ -82,6 +83,13 @@ fn delete_file(path: String) -> Result<(), String> {
     fs::remove_file(&path).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn close_app<R: tauri::Runtime>(app: tauri::AppHandle<R>) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.destroy();
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     env_logger::init();
@@ -90,6 +98,21 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
+        .setup(|app| {
+            let window = app.get_webview_window("main").unwrap();
+            let window_clone = window.clone();
+            
+            window.on_window_event(move |event| {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    // 阻止默认关闭
+                    api.prevent_close();
+                    // 发送事件给前端
+                    let _ = window_clone.emit("close-requested", ());
+                }
+            });
+            
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             read_file,
             write_file,
@@ -97,7 +120,8 @@ pub fn run() {
             read_directory,
             get_file_name,
             rename_file,
-            delete_file
+            delete_file,
+            close_app
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
