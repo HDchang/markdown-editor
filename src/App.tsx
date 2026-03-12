@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
+import { ask } from '@tauri-apps/plugin-dialog';
 import { save } from '@tauri-apps/plugin-dialog';
 import { Editor, EditorHandle } from './components/Editor';
 import { Sidebar } from './components/Sidebar';
@@ -22,6 +24,10 @@ function App() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
+  const autoSaveRef = useRef(autoSaveEnabled);
+  const hasChangesRef = useRef(hasChanges);
+  const currentFileRef = useRef(currentFile);
+  const markdownContentRef = useRef(markdownContent);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<EditorHandle>(null);
@@ -29,19 +35,69 @@ function App() {
 
   const isDarkMode = theme === 'dark';
 
+  // Update refs when state changes
+  useEffect(() => { autoSaveRef.current = autoSaveEnabled; }, [autoSaveEnabled]);
+  useEffect(() => { hasChangesRef.current = hasChanges; }, [hasChanges]);
+  useEffect(() => { currentFileRef.current = currentFile; }, [currentFile]);
+  useEffect(() => { markdownContentRef.current = markdownContent; }, [markdownContent]);
+
 
 
   // Save function
+
+
   const handleSave = useCallback(async () => {
-    if (currentFile) {
+    const file = currentFileRef.current;
+    const content = markdownContentRef.current;
+    if (file && content !== undefined) {
       try {
-        await invoke('write_file', { path: currentFile, content: markdownContent });
+        await invoke('write_file', { path: file, content });
         setHasChanges(false);
+        console.log('File saved:', file);
       } catch (error) {
         console.error('Failed to save file:', error);
       }
+    } else {
+      console.error('Cannot save: file or content is undefined');
     }
-  }, [currentFile, markdownContent]);
+  }, []);
+
+  // Handle window close with save prompt
+  useEffect(() => {
+    let isClosing = false;
+    let unlisten: (() => void) | undefined;
+
+    const setup = async () => {
+      unlisten = await listen('close-requested', async () => {
+        console.log('Close requested, isClosing:', isClosing);
+        if (isClosing) return;
+        isClosing = true;
+
+        try {
+          if (!autoSaveRef.current && hasChangesRef.current && currentFileRef.current) {
+            console.log('Showing ask dialog');
+            const shouldSave = await ask(
+              'Save changes before closing?',
+              { title: 'Close File', kind: 'warning', okLabel: 'Save', cancelLabel: 'Discard' }
+            );
+            console.log('User choice:', shouldSave);
+            if (shouldSave) {
+              await handleSave();
+            }
+          }
+          // 调用 Rust 命令，强制销毁窗口
+          console.log('Calling close_app');
+          await invoke('close_app');
+        } catch (error) {
+          console.error("Error during close:", error);
+          isClosing = false;
+        }
+      });
+    };
+
+    setup();
+    return () => { if (unlisten) unlisten(); };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
